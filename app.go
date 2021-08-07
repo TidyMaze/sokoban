@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"sort"
 	"strings"
 )
 import _ "net/http/pprof"
@@ -165,33 +166,39 @@ func goTo(direction Direction, grid Grid, state State) State {
 }
 
 func hashCoord(coord Coord) int {
-	hash := 11
-	hash = 43*hash + coord.x
-	hash = 43*hash + coord.y
-	hash = 43*hash + coord.x
-	hash = 43*hash + coord.y
+	hash := 31
+	hash = 31*hash + coord.x
+	hash = 31*hash + coord.y
 	return hash
 }
 
 func hashCoords(coords [5]Coord, boxCount int) int {
-	hash := 47
+	hash := 31
 	for i := 0; i < boxCount; i++ {
-		hash = 97*hash + hashCoord(coords[i])
-		hash = 97*hash + hashCoord(coords[i])
+		hash = 31*hash + hashCoord(coords[i])
 	}
+
 	return hash
 }
 
 func hashState(state State) int {
 	//log("generating hash for", state)
-	hash := 17
-	hash = 41*hash + hashCoord(state.pusher)
-	//log("- hash with the pusher", hash)
-	hash = 89*hash + hashCoords(state.boxes, state.boxCount)
-	//log("- hash with the box", hash)
+	sort.SliceStable(state.boxes[0:len(state.boxes)], func(i, j int) bool {
+		y1 := state.boxes[i].y
+		y2 := state.boxes[j].y
+		x1 := state.boxes[i].x
+		x2 := state.boxes[j].x
+		if y1 != y2 {
+			return y1 < y2
+		} else {
+			return x1 < x2
+		}
+	})
 
-	hash = 41*hash + hashCoord(state.pusher)
-	hash = 89*hash + hashCoords(state.boxes, state.boxCount)
+	hash := 31
+	hash = 31*hash + hashCoord(state.pusher)
+	hash = 31*hash + hashCoords(state.boxes, state.boxCount)
+	println(hash)
 	return hash
 }
 
@@ -205,10 +212,6 @@ func Equal(a, b [5]Coord, boxCount int) bool {
 		}
 	}
 	return true
-}
-
-func sameState(state1 State, state2 State) bool {
-	return state1.pusher == state2.pusher && Equal(state1.boxes, state2.boxes, state1.boxCount)
 }
 
 func scoreState(grid Grid, state State) int {
@@ -226,6 +229,7 @@ func getGrid(grid Grid, coord Coord) Cell {
 }
 
 func boxStuck(grid Grid, box Coord) bool {
+	//return false
 	isTarget := getGrid(grid, box) == "*"
 
 	if isTarget {
@@ -256,15 +260,8 @@ func stateIsLost(grid Grid, state State) bool {
 	return false
 }
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 func findBestAction(grid Grid, state State) Candidate {
-	seenStates := make(map[int]struct{}, 20000000)
+	seenStates := make(map[State]struct{}, 20000000)
 
 	const MAX_DEPTH = 400
 
@@ -278,7 +275,7 @@ func findBestAction(grid Grid, state State) Candidate {
 		state:   state,
 	}
 	heap.Push(candidates, &initState)
-	seenStates[hashState(initState.state)] = struct{}{}
+	seenStates[initState.state] = struct{}{}
 
 	for len(*candidates) > 0 {
 		c := heap.Pop(candidates).(*Candidate)
@@ -297,11 +294,11 @@ func findBestAction(grid Grid, state State) Candidate {
 				newState := goTo(d, grid, c.state)
 
 				if newState.pusher != c.state.pusher {
-					hChild := hashState(newState)
-					_, childSeen := seenStates[hChild]
+					//hChild := hashState(newState)
+					_, childSeen := seenStates[newState]
 
 					if !childSeen {
-						seenStates[hChild] = struct{}{}
+						seenStates[newState] = struct{}{}
 						if !stateIsLost(grid, newState) {
 							score := scoreState(grid, newState)
 							newCandidate := &Candidate{
@@ -320,12 +317,12 @@ func findBestAction(grid Grid, state State) Candidate {
 				}
 			}
 
-			const MAX_BUFFER = 10000
-			if len(*candidates) > MAX_BUFFER {
-				for len(*candidates) > (MAX_BUFFER / 2) {
-					heap.Remove(candidates, len(*candidates)-1)
-				}
-			}
+			//const MAX_BUFFER = 10000
+			//if len(*candidates) > MAX_BUFFER {
+			//	for len(*candidates) > (MAX_BUFFER / 2) {
+			//		heap.Remove(candidates, len(*candidates)-1)
+			//	}
+			//}
 		}
 	}
 
