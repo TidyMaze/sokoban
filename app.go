@@ -280,9 +280,8 @@ func min(a, b int) int {
 }
 
 func findBestAction(grid Grid, state State) Candidate {
-	seenStates := make(map[int]bool, 20000000)
+	seenStates := make(map[int]struct{}, 20000000)
 
-	const MAX_NEW_CANDIDATES = 10
 	const MAX_DEPTH = 400
 
 	internalHeap := make(CandidateHeap, 0, 500000)
@@ -295,7 +294,7 @@ func findBestAction(grid Grid, state State) Candidate {
 		state:   state,
 	}
 	heap.Push(candidates, &initState)
-	seenStates[hashState(initState.state)] = true
+	seenStates[hashState(initState.state)] = struct{}{}
 
 	for len(*candidates) > 0 {
 		// log("candidates", candidates)
@@ -350,7 +349,7 @@ func findBestAction(grid Grid, state State) Candidate {
 					// }
 
 					if !childSeen {
-						seenStates[hChild] = true
+						seenStates[hChild] = struct{}{}
 						if !stateIsLost(grid, newState) {
 							newHistory := make([]Direction, len(c.actions), MAX_DEPTH)
 							copy(newHistory, c.actions)
