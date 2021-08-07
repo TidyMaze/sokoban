@@ -279,13 +279,6 @@ func findBestAction(grid Grid, state State) Candidate {
 						}
 					}
 				}
-
-				const MAX_BUFFER = 100000
-				if len(*candidates) > MAX_BUFFER {
-					for len(*candidates) > (MAX_BUFFER / 2) {
-						heap.Remove(candidates, len(*candidates)-1)
-					}
-				}
 			}
 		}
 	}
