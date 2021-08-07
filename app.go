@@ -240,7 +240,7 @@ func findBestAction(grid Grid, state State) Candidate {
 
 		seenStates[initState.state] = struct{}{}
 
-		for len(*candidates) > 0 {
+		for thereAreStillCandidates(candidates) {
 			candidate := getBestCandidate(candidates)
 			if won(candidate, candidate.state) {
 				return storeWin(candidate, seenStates, internalHeap)
@@ -255,6 +255,10 @@ func findBestAction(grid Grid, state State) Candidate {
 	}
 
 	panic("no solution found")
+}
+
+func thereAreStillCandidates(candidates *CandidateHeap) bool {
+	return len(*candidates) > 0
 }
 
 func getBestCandidate(candidates *CandidateHeap) *Candidate {
@@ -309,7 +313,6 @@ func buildNewCandidate(grid Grid, newState State, c *Candidate, maxDepth int, d 
 	score := scoreState(grid, newState)
 
 	newActions := make([]Direction, len(c.actions), maxDepth)
-
 	copy(newActions, c.actions)
 	newActions = append(newActions, d)
 
