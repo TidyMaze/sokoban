@@ -1,4 +1,4 @@
-.PHONY: build build-profile run-profile profile-all display-cpu-profile display-heap-profile
+.PHONY: build build-profile run-profile profile-all display-cpu-profile display-heap-profile live-cpu-profile live-heap-profile
 build:
 	go build -o out/sokoban
 
@@ -16,5 +16,8 @@ display-heap-profile:
 
 live-heap-profile:
 	pprof -http=:8080 http://localhost:6060/debug/pprof/heap
+
+live-cpu-profile:
+	pprof -http=:8080 http://localhost:6060/debug/pprof/profile?seconds=10
 
 profile-all: run-profile live-heap-profile
