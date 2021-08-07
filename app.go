@@ -129,6 +129,14 @@ func moveBox(boxes [5]Coord, boxCount int, from Coord, to Coord) [5]Coord {
 	for i := 0; i < boxCount; i++ {
 		if newBoxes[i] == from {
 			newBoxes[i] = to
+
+			sl := newBoxes[:]
+			//print("before and after")
+			//print(fmt.Sprintf("%v", newBoxes))
+			sortCoords(sl[:boxCount])
+			//print(fmt.Sprintf("%v", newBoxes))
+			//println()
+
 			return newBoxes
 		}
 	}
@@ -181,24 +189,28 @@ func hashCoords(coords [5]Coord, boxCount int) int {
 	return hash
 }
 
-func hashState(state State) int {
-	//log("generating hash for", state)
-	sort.SliceStable(state.boxes[0:len(state.boxes)], func(i, j int) bool {
-		y1 := state.boxes[i].y
-		y2 := state.boxes[j].y
-		x1 := state.boxes[i].x
-		x2 := state.boxes[j].x
+func sortCoords(coords []Coord) {
+	sort.SliceStable(coords, func(i, j int) bool {
+		y1 := coords[i].y
+		y2 := coords[j].y
+		x1 := coords[i].x
+		x2 := coords[j].x
+		//println(y1, y2, x1, x2)
 		if y1 != y2 {
 			return y1 < y2
 		} else {
 			return x1 < x2
 		}
 	})
+}
+
+func hashState(state State) int {
+	//log("generating hash for", state)
 
 	hash := 31
 	hash = 31*hash + hashCoord(state.pusher)
 	hash = 31*hash + hashCoords(state.boxes, state.boxCount)
-	println(hash)
+	//println(hash)
 	return hash
 }
 
@@ -275,6 +287,13 @@ func findBestAction(grid Grid, state State) Candidate {
 		state:   state,
 	}
 	heap.Push(candidates, &initState)
+
+	s := initState.state.boxes[:initState.state.boxCount]
+	//println("before and after")
+	//fmt.Printf("%v", s)
+	sortCoords(s)
+	//fmt.Printf("%v", s)
+
 	seenStates[initState.state] = struct{}{}
 
 	for len(*candidates) > 0 {
