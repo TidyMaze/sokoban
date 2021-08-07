@@ -244,7 +244,8 @@ func findBestAction(grid Grid, state State) Candidate {
 			c := heap.Pop(candidates).(*Candidate)
 
 			// win!
-			if c.score == c.state.boxCount {
+			candidateState := c.state
+			if c.score == candidateState.boxCount {
 				log("won", c)
 				solution = c.actions[1:]
 				log("seenStates len", len(seenStates))
@@ -253,19 +254,12 @@ func findBestAction(grid Grid, state State) Candidate {
 			}
 
 			if len(c.actions) < maxDepth {
-
 				for _, d := range directions {
-					newState := goTo(d, grid, c.state)
-
-					if newState.pusher != c.state.pusher {
-						_, childSeen := seenStates[newState]
-
-						if !childSeen {
-							seenStates[newState] = struct{}{}
-							if !stateIsLost(grid, newState) {
-								newCandidate := buildNewCandidate(grid, newState, c, maxDepth, d)
-								heap.Push(candidates, &newCandidate)
-							}
+					newState := goTo(d, grid, candidateState)
+					if discoveredNewValidState(newState, candidateState, seenStates) {
+						markStateAsSeen(seenStates, newState)
+						if !stateIsLost(grid, newState) {
+							addNewCandidateToQueue(grid, newState, c, maxDepth, d, candidates)
 						}
 					}
 				}
@@ -274,6 +268,28 @@ func findBestAction(grid Grid, state State) Candidate {
 	}
 
 	panic("no solution found")
+}
+
+func discoveredNewValidState(newState State, candidateState State, seenStates map[State]struct{}) bool {
+	return pusherMoved(newState, candidateState) && !isStateSeen(seenStates, newState)
+}
+
+func pusherMoved(newState State, candidateState State) bool {
+	return newState.pusher != candidateState.pusher
+}
+
+func isStateSeen(seenStates map[State]struct{}, newState State) bool {
+	_, childSeen := seenStates[newState]
+	return childSeen
+}
+
+func markStateAsSeen(seenStates map[State]struct{}, newState State) {
+	seenStates[newState] = struct{}{}
+}
+
+func addNewCandidateToQueue(grid Grid, newState State, c *Candidate, maxDepth int, d Direction, candidates *CandidateHeap) {
+	newCandidate := buildNewCandidate(grid, newState, c, maxDepth, d)
+	heap.Push(candidates, &newCandidate)
 }
 
 func buildNewCandidate(grid Grid, newState State, c *Candidate, maxDepth int, d Direction) Candidate {
