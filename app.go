@@ -481,7 +481,22 @@ func mainProfile() {
 		Coord{4, 6},
 	}
 
-	puzzles := []Puzzle{easyPuzzle, mediumPuzzle}
+	mediumPuzzle2 := Puzzle{
+		`.####....
+.#..#....
+.#..#####
+##..#...#
+#....*..#
+#.#.*.###
+#..**.#..
+####..#..
+...####..`,
+		[5]Coord{{x: 2, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}, {x: 3, y: 5}},
+		4,
+		Coord{5, 3},
+	}
+
+	puzzles := []Puzzle{mediumPuzzle2, mediumPuzzle, easyPuzzle}
 
 	for _, puzzle := range puzzles {
 		state := State{
