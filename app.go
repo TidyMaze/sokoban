@@ -235,7 +235,7 @@ func findBestAction(grid Grid, state State) Candidate {
 		for thereAreStillCandidates(candidates) {
 			candidate := getBestCandidate(candidates)
 			if won(candidate, candidate.state) {
-				storeWin(candidate, seenStates, internalHeap)
+				storeWin(candidate, seenStates, *candidates)
 				return *candidate
 			}
 
@@ -272,11 +272,11 @@ func getBestCandidate(candidates *CandidateHeap) *Candidate {
 	return heap.Pop(candidates).(*Candidate)
 }
 
-func storeWin(c *Candidate, seenStates map[State]struct{}, internalHeap CandidateHeap) {
+func storeWin(c *Candidate, seenStates map[State]struct{}, candidates CandidateHeap) {
 	log("won", c)
 	solution = c.actions[1:]
 	log("seenStates len", len(seenStates))
-	log("heap cap", cap(internalHeap))
+	log("heap cap", cap(candidates))
 }
 
 func won(c *Candidate, candidateState State) bool {
