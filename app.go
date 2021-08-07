@@ -349,10 +349,10 @@ func findBestAction(grid Grid, state State) Candidate {
 			// 	return candidates[i].score < candidates[j].score
 			// })
 
-			const MAX_BUFFER = 400
-			if len(candidates) > MAX_BUFFER {
-				candidates = candidates[len(candidates)-MAX_BUFFER:]
-			}
+			//const MAX_BUFFER = 400
+			//if len(candidates) > MAX_BUFFER {
+			//	candidates = candidates[len(candidates)-MAX_BUFFER:]
+			//}
 		}
 	}
 
