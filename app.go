@@ -35,6 +35,24 @@ type Puzzle struct {
 	startCoord Coord
 }
 
+type CandidateHeap []Candidate
+
+func (h CandidateHeap) Len() int           { return len(h) }
+func (h CandidateHeap) Less(i, j int) bool { return h[i].score < h[j].score }
+func (h CandidateHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
+
+func (h *CandidateHeap) Push(x interface{}) {
+	*h = append(*h, x.(Candidate))
+}
+
+func (h *CandidateHeap) Pop() interface{} {
+	old := *h
+	n := len(old)
+	x := old[n-1]
+	*h = old[0 : n-1]
+	return x
+}
+
 func log(msg string, v interface{}) {
 	fmt.Fprintf(os.Stderr, "%s: %+v\n", msg, v)
 }
@@ -322,8 +340,8 @@ func findBestAction(grid Grid, state State) Candidate {
 					// }
 
 					if !childSeen {
+						seenStates[hChild] = true
 						if !stateIsLost(grid, newState) {
-							seenStates[hChild] = true
 							newHistory := make([]Direction, len(c.actions), MAX_DEPTH)
 							copy(newHistory, c.actions)
 							newHistory = append(newHistory, d)
@@ -345,9 +363,9 @@ func findBestAction(grid Grid, state State) Candidate {
 				}
 			}
 
-			// sort.Slice(candidates, func(i, j int) bool {
-			// 	return candidates[i].score < candidates[j].score
-			// })
+			//sort.Slice(candidates, func(i, j int) bool {
+			//	return candidates[i].score < candidates[j].score
+			//})
 
 			//const MAX_BUFFER = 400
 			//if len(candidates) > MAX_BUFFER {
@@ -496,7 +514,8 @@ func mainProfile() {
 		Coord{5, 3},
 	}
 
-	puzzles := []Puzzle{mediumPuzzle2, mediumPuzzle, easyPuzzle}
+	//puzzles := []Puzzle{mediumPuzzle2, mediumPuzzle, easyPuzzle}
+	puzzles := []Puzzle{easyPuzzle, mediumPuzzle, mediumPuzzle2}[:2]
 
 	for _, puzzle := range puzzles {
 		state := State{
