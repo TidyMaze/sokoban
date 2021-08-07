@@ -222,7 +222,7 @@ func stateIsLost(grid Grid, state State) bool {
 }
 
 func findBestAction(grid Grid, state State) Candidate {
-	for maxDepth := 10; maxDepth <= 400; maxDepth += 10 {
+	for maxDepth := 100; maxDepth <= 400; maxDepth += 100 {
 		seenStates := make(map[State]struct{}, 300000)
 		internalHeap := make(CandidateHeap, 0, 10000)
 		candidates := &internalHeap
@@ -263,18 +263,8 @@ func findBestAction(grid Grid, state State) Candidate {
 						if !childSeen {
 							seenStates[newState] = struct{}{}
 							if !stateIsLost(grid, newState) {
-								score := scoreState(grid, newState)
-								newCandidate := &Candidate{
-									actions: make([]Direction, len(c.actions), maxDepth),
-									score:   score,
-									state:   newState,
-								}
-
-								copy(newCandidate.actions, c.actions)
-								newCandidate.actions = append(newCandidate.actions, d)
-
-								heap.Push(candidates, newCandidate)
-
+								newCandidate := buildNewCandidate(grid, newState, c, maxDepth, d)
+								heap.Push(candidates, &newCandidate)
 							}
 						}
 					}
@@ -284,6 +274,20 @@ func findBestAction(grid Grid, state State) Candidate {
 	}
 
 	panic("no solution found")
+}
+
+func buildNewCandidate(grid Grid, newState State, c *Candidate, maxDepth int, d Direction) Candidate {
+	score := scoreState(grid, newState)
+	newActions := make([]Direction, len(c.actions), maxDepth)
+	copy(newActions, c.actions)
+	newActions = append(newActions, d)
+	newCandidate := Candidate{
+		actions: newActions,
+		score:   score,
+		state:   newState,
+	}
+
+	return newCandidate
 }
 
 var solution = []Direction{}
