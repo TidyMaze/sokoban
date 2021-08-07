@@ -131,11 +131,9 @@ func moveBox(boxes [5]Coord, boxCount int, from Coord, to Coord) [5]Coord {
 			newBoxes[i] = to
 
 			sl := newBoxes[:]
-			//print("before and after")
-			//print(fmt.Sprintf("%v", newBoxes))
+
+			// necessary for state hashing, boxes order is NOT important, so we can sort them
 			sortCoords(sl[:boxCount])
-			//print(fmt.Sprintf("%v", newBoxes))
-			//println()
 
 			return newBoxes
 		}
@@ -289,10 +287,7 @@ func findBestAction(grid Grid, state State) Candidate {
 	heap.Push(candidates, &initState)
 
 	s := initState.state.boxes[:initState.state.boxCount]
-	//println("before and after")
-	//fmt.Printf("%v", s)
 	sortCoords(s)
-	//fmt.Printf("%v", s)
 
 	seenStates[initState.state] = struct{}{}
 
