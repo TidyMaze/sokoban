@@ -129,10 +129,7 @@ func moveBox(boxes [5]Coord, boxCount int, from Coord, to Coord) [5]Coord {
 	for i := 0; i < boxCount; i++ {
 		if newBoxes[i] == from {
 			newBoxes[i] = to
-			sl := newBoxes[:]
-
-			sortBoxesForStableHash(sl[:boxCount])
-
+			sortBoxesForStableHash(newBoxes[:boxCount])
 			return newBoxes
 		}
 	}
