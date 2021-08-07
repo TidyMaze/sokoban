@@ -241,24 +241,24 @@ func findBestAction(grid Grid, state State) Candidate {
 		seenStates[initState.state] = struct{}{}
 
 		for len(*candidates) > 0 {
-			c := heap.Pop(candidates).(*Candidate)
-
-			candidateState := c.state
-
-			// win!
-			if won(c, candidateState) {
-				return storeWin(c, seenStates, internalHeap)
+			candidate := getBestCandidate(candidates)
+			if won(candidate, candidate.state) {
+				return storeWin(candidate, seenStates, internalHeap)
 			}
 
-			if !reachedMaxDepth(c, maxDepth) {
+			if !reachedMaxDepth(candidate, maxDepth) {
 				for _, d := range directions {
-					exploreInDirection(grid, d, candidateState, seenStates, c, maxDepth, candidates)
+					exploreInDirection(grid, d, candidate.state, seenStates, candidate, maxDepth, candidates)
 				}
 			}
 		}
 	}
 
 	panic("no solution found")
+}
+
+func getBestCandidate(candidates *CandidateHeap) *Candidate {
+	return heap.Pop(candidates).(*Candidate)
 }
 
 func storeWin(c *Candidate, seenStates map[State]struct{}, internalHeap CandidateHeap) Candidate {
@@ -282,7 +282,8 @@ func exploreInDirection(grid Grid, d Direction, candidateState State, seenStates
 	if discoveredNewValidState(newState, candidateState, seenStates) {
 		markStateAsSeen(seenStates, newState)
 		if !stateIsLost(grid, newState) {
-			addNewCandidateToQueue(grid, newState, c, maxDepth, d, candidates)
+			newCandidate := buildNewCandidate(grid, newState, c, maxDepth, d)
+			heap.Push(candidates, &newCandidate)
 		}
 	}
 }
@@ -302,11 +303,6 @@ func isStateSeen(seenStates map[State]struct{}, newState State) bool {
 
 func markStateAsSeen(seenStates map[State]struct{}, newState State) {
 	seenStates[newState] = struct{}{}
-}
-
-func addNewCandidateToQueue(grid Grid, newState State, c *Candidate, maxDepth int, d Direction, candidates *CandidateHeap) {
-	newCandidate := buildNewCandidate(grid, newState, c, maxDepth, d)
-	heap.Push(candidates, &newCandidate)
 }
 
 func buildNewCandidate(grid Grid, newState State, c *Candidate, maxDepth int, d Direction) Candidate {
