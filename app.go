@@ -287,8 +287,7 @@ func buildInitialCandidate(grid Grid, state State, candidates *CandidateHeap) Ca
 		state:   state,
 	}
 
-	boxes := candidate.state.boxes[:candidate.state.boxCount]
-	sortBoxesForStableHash(boxes)
+	sortBoxesForStableHash(candidate.state.boxes[:candidate.state.boxCount])
 
 	heap.Push(candidates, &candidate)
 	return candidate
