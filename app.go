@@ -271,11 +271,11 @@ func stateIsLost(grid Grid, state State) bool {
 }
 
 func findBestAction(grid Grid, state State) Candidate {
-	seenStates := make(map[State]struct{})
+	seenStates := make(map[State]struct{}, 300000)
 
 	const MAX_DEPTH = 400
 
-	internalHeap := make(CandidateHeap, 0)
+	internalHeap := make(CandidateHeap, 0, 10000)
 	candidates := &internalHeap
 	heap.Init(candidates)
 
@@ -298,7 +298,8 @@ func findBestAction(grid Grid, state State) Candidate {
 		if c.score == c.state.boxCount {
 			log("won", c)
 			solution = c.actions[1:]
-			log("seenStates length", len(seenStates))
+			log("seenStates len", len(seenStates))
+			log("heap cap", cap(internalHeap))
 			return *c
 		}
 
