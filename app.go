@@ -255,7 +255,7 @@ func min(a, b int) int {
 }
 
 func findBestAction(grid Grid, state State) Candidate {
-	seenStates := make(map[State]bool, 5000000)
+	seenStates := make(map[int]bool, 5000000)
 
 	const MAX_NEW_CANDIDATES = 10
 	const MAX_DEPTH = 400
@@ -267,7 +267,7 @@ func findBestAction(grid Grid, state State) Candidate {
 		state:   state,
 	}
 	candidates = append(candidates, initState)
-	seenStates[initState.state] = true
+	seenStates[hashState(initState.state)] = true
 
 	for len(candidates) > 0 {
 		// log("candidates", candidates)
@@ -304,10 +304,10 @@ func findBestAction(grid Grid, state State) Candidate {
 				// }
 
 				if newState.pusher != c.state.pusher {
-					// hChild := hashState(newState)
+					hChild := hashState(newState)
 					// log("hChild", hChild)
 
-					_, childSeen := seenStates[newState]
+					_, childSeen := seenStates[hChild]
 
 					// hStored := hashState(storedState)
 
@@ -323,7 +323,7 @@ func findBestAction(grid Grid, state State) Candidate {
 
 					if !childSeen {
 						if !stateIsLost(grid, newState) {
-							seenStates[newState] = true
+							seenStates[hChild] = true
 							newHistory := make([]Direction, len(c.actions), MAX_DEPTH)
 							copy(newHistory, c.actions)
 							newHistory = append(newHistory, d)
