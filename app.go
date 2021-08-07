@@ -16,11 +16,10 @@ type Coord struct {
 	x, y int
 }
 
-var boxCount = 0
-
 type State struct {
-	pusher Coord
-	boxes  [5]Coord
+	pusher   Coord
+	boxes    [5]Coord
+	boxCount int
 }
 
 type Candidate struct {
@@ -79,7 +78,7 @@ func getNeighbor(direction Direction, coord Coord) Coord {
 	panic("No case for dir " + fmt.Sprint(direction))
 }
 
-func contains(s [5]Coord, e Coord) bool {
+func contains(s [5]Coord, boxCount int, e Coord) bool {
 	for i := 0; i < boxCount; i++ {
 		if s[i] == e {
 			return true
@@ -95,11 +94,11 @@ func isWall(grid Grid, coord Coord) bool {
 	return grid[coord.y][coord.x] == "#"
 }
 
-func isBox(boxes [5]Coord, coord Coord) bool {
-	return contains(boxes, coord)
+func isBox(boxes [5]Coord, boxCount int, coord Coord) bool {
+	return contains(boxes, boxCount, coord)
 }
 
-func moveBox(boxes [5]Coord, from Coord, to Coord) [5]Coord {
+func moveBox(boxes [5]Coord, boxCount int, from Coord, to Coord) [5]Coord {
 	newBoxes := boxes
 	for i := 0; i < boxCount; i++ {
 		if newBoxes[i] == from {
@@ -123,24 +122,26 @@ func goTo(direction Direction, grid Grid, state State) State {
 	if isWall(grid, destination) {
 		// cannot move if wall
 		return state
-	} else if isBox(state.boxes, destination) {
+	} else if isBox(state.boxes, state.boxCount, destination) {
 		// check if next is available if cell is box
 		afterBoxCoord := getNeighbor(direction, destination)
-		if isWall(grid, afterBoxCoord) || isBox(state.boxes, afterBoxCoord) {
+		if isWall(grid, afterBoxCoord) || isBox(state.boxes, state.boxCount, afterBoxCoord) {
 			// cannot push box if next is wall or another box
 			return state
 		} else {
 			// can push box, copy and replace boxes list
 			return State{
-				pusher: destination,
-				boxes:  moveBox(state.boxes, destination, afterBoxCoord),
+				pusher:   destination,
+				boxes:    moveBox(state.boxes, state.boxCount, destination, afterBoxCoord),
+				boxCount: state.boxCount,
 			}
 		}
 	} else {
 		// can move if empty cell
 		return State{
-			pusher: destination,
-			boxes:  state.boxes,
+			pusher:   destination,
+			boxes:    state.boxes,
+			boxCount: state.boxCount,
 		}
 	}
 }
@@ -154,7 +155,7 @@ func hashCoord(coord Coord) int {
 	return hash
 }
 
-func hashCoords(coords [5]Coord) int {
+func hashCoords(coords [5]Coord, boxCount int) int {
 	hash := 47
 	for i := 0; i < boxCount; i++ {
 		hash = 97*hash + hashCoord(coords[i])
@@ -168,15 +169,15 @@ func hashState(state State) int {
 	hash := 17
 	hash = 41*hash + hashCoord(state.pusher)
 	//log("- hash with the pusher", hash)
-	hash = 89*hash + hashCoords(state.boxes)
+	hash = 89*hash + hashCoords(state.boxes, state.boxCount)
 	//log("- hash with the box", hash)
 
 	hash = 41*hash + hashCoord(state.pusher)
-	hash = 89*hash + hashCoords(state.boxes)
+	hash = 89*hash + hashCoords(state.boxes, state.boxCount)
 	return hash
 }
 
-func Equal(a, b [5]Coord) bool {
+func Equal(a, b [5]Coord, boxCount int) bool {
 	if len(a) != len(b) {
 		return false
 	}
@@ -189,7 +190,7 @@ func Equal(a, b [5]Coord) bool {
 }
 
 func sameState(state1 State, state2 State) bool {
-	return state1.pusher == state2.pusher && Equal(state1.boxes, state2.boxes)
+	return state1.pusher == state2.pusher && Equal(state1.boxes, state2.boxes, state1.boxCount)
 }
 
 // func copyState(state State) State {
@@ -203,7 +204,7 @@ func sameState(state1 State, state2 State) bool {
 
 func scoreState(grid Grid, state State) int {
 	count := 0
-	for i := 0; i < boxCount; i++ {
+	for i := 0; i < state.boxCount; i++ {
 		if grid[state.boxes[i].y][state.boxes[i].x] == "*" {
 			count += 1
 		}
@@ -238,7 +239,7 @@ func boxStuck(grid Grid, box Coord) bool {
 }
 
 func stateIsLost(grid Grid, state State) bool {
-	for i := 0; i < boxCount; i++ {
+	for i := 0; i < state.boxCount; i++ {
 		if boxStuck(grid, state.boxes[i]) {
 			return true
 		}
@@ -282,7 +283,7 @@ func findBestAction(grid Grid, state State) Candidate {
 		// candidates.Remove(ci)
 
 		// win!
-		if c.score == boxCount {
+		if c.score == c.state.boxCount {
 			log("won", c)
 			solution = c.actions[1:]
 			log("seenStates length", len(seenStates))
@@ -376,7 +377,7 @@ func mainCg() {
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Buffer(make([]byte, 1000000), 1000000)
 
-	var width, height int
+	var width, height, boxCount int
 	scanner.Scan()
 	fmt.Sscan(scanner.Text(), &width, &height, &boxCount)
 
@@ -406,8 +407,9 @@ func mainCg() {
 		log("boxes", boxes)
 
 		state := State{
-			pusher: p,
-			boxes:  boxes,
+			pusher:   p,
+			boxes:    boxes,
+			boxCount: boxCount,
 		}
 
 		if len(solution) > 0 {
@@ -483,11 +485,10 @@ func mainProfile() {
 
 	for _, puzzle := range puzzles {
 		state := State{
-			pusher: puzzle.startCoord,
-			boxes:  puzzle.boxes,
+			pusher:   puzzle.startCoord,
+			boxes:    puzzle.boxes,
+			boxCount: puzzle.boxCount,
 		}
-
-		boxCount = 5
 
 		grid := parseGrid(puzzle.rawGrid)
 
