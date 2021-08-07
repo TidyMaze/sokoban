@@ -223,9 +223,8 @@ func stateIsLost(grid Grid, state State) bool {
 
 func findBestAction(grid Grid, state State) Candidate {
 	for maxDepth := 100; maxDepth <= 400; maxDepth += 100 {
-		seenStates := make(map[State]struct{}, 300000)
-		candidateHeap := make(CandidateHeap, 0, 10000)
-		heap.Init(&candidateHeap)
+		seenStates := buildSeenMap()
+		candidateHeap := buildCandidatesQueue()
 
 		initState := buildInitialCandidate(grid, state, &candidateHeap)
 
@@ -247,6 +246,16 @@ func findBestAction(grid Grid, state State) Candidate {
 	}
 
 	panic("no solution found")
+}
+
+func buildCandidatesQueue() CandidateHeap {
+	candidateHeap := make(CandidateHeap, 0, 10000)
+	heap.Init(&candidateHeap)
+	return candidateHeap
+}
+
+func buildSeenMap() map[State]struct{} {
+	return make(map[State]struct{}, 300000)
 }
 
 func buildInitialCandidate(grid Grid, state State, candidates *CandidateHeap) Candidate {
