@@ -224,24 +224,23 @@ func stateIsLost(grid Grid, state State) bool {
 func findBestAction(grid Grid, state State) Candidate {
 	for maxDepth := 100; maxDepth <= 400; maxDepth += 100 {
 		seenStates := make(map[State]struct{}, 300000)
-		internalHeap := make(CandidateHeap, 0, 10000)
-		candidates := &internalHeap
-		heap.Init(candidates)
+		candidateHeap := make(CandidateHeap, 0, 10000)
+		heap.Init(&candidateHeap)
 
-		initState := buildInitialCandidate(grid, state, candidates)
+		initState := buildInitialCandidate(grid, state, &candidateHeap)
 
 		markStateAsSeen(seenStates, initState.state)
 
-		for thereAreStillCandidates(candidates) {
-			candidate := getBestCandidate(candidates)
+		for thereAreStillCandidates(&candidateHeap) {
+			candidate := getBestCandidate(&candidateHeap)
 			if won(candidate, candidate.state) {
-				storeWin(candidate, seenStates, *candidates)
+				storeWin(candidate, seenStates, candidateHeap)
 				return *candidate
 			}
 
 			if !reachedMaxDepth(candidate, maxDepth) {
 				for _, d := range directions {
-					exploreInDirection(grid, d, candidate.state, seenStates, candidate, maxDepth, candidates)
+					exploreInDirection(grid, d, candidate.state, seenStates, candidate, maxDepth, &candidateHeap)
 				}
 			}
 		}
