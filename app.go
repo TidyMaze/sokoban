@@ -238,7 +238,7 @@ func findBestAction(grid Grid, state State) Candidate {
 		s := initState.state.boxes[:initState.state.boxCount]
 		sortCoords(s)
 
-		seenStates[initState.state] = struct{}{}
+		markStateAsSeen(seenStates, initState.state)
 
 		for thereAreStillCandidates(candidates) {
 			candidate := getBestCandidate(candidates)
