@@ -37,14 +37,12 @@ type Puzzle struct {
 	startCoord Coord
 }
 
+/**
+Priority queue, highest score first
+*/
 type CandidateHeap []*Candidate
 
-func (h CandidateHeap) Len() int { return len(h) }
-
-/**
-WTF we pop the last element so the last should be the highest, not the lowest!
-Yet this impl works a lot better
-*/
+func (h CandidateHeap) Len() int           { return len(h) }
 func (h CandidateHeap) Less(i, j int) bool { return h[i].score > h[j].score }
 func (h CandidateHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
 
@@ -129,7 +127,6 @@ func moveBox(boxes [5]Coord, boxCount int, from Coord, to Coord) [5]Coord {
 	for i := 0; i < boxCount; i++ {
 		if newBoxes[i] == from {
 			newBoxes[i] = to
-
 			sl := newBoxes[:]
 
 			// necessary for state hashing, boxes order is NOT important, so we can sort them
@@ -171,57 +168,18 @@ func goTo(direction Direction, grid Grid, state State) State {
 	}
 }
 
-func hashCoord(coord Coord) int {
-	hash := 31
-	hash = 31*hash + coord.x
-	hash = 31*hash + coord.y
-	return hash
-}
-
-func hashCoords(coords [5]Coord, boxCount int) int {
-	hash := 31
-	for i := 0; i < boxCount; i++ {
-		hash = 31*hash + hashCoord(coords[i])
-	}
-
-	return hash
-}
-
 func sortCoords(coords []Coord) {
 	sort.SliceStable(coords, func(i, j int) bool {
 		y1 := coords[i].y
 		y2 := coords[j].y
 		x1 := coords[i].x
 		x2 := coords[j].x
-		//println(y1, y2, x1, x2)
 		if y1 != y2 {
 			return y1 < y2
 		} else {
 			return x1 < x2
 		}
 	})
-}
-
-func hashState(state State) int {
-	//log("generating hash for", state)
-
-	hash := 31
-	hash = 31*hash + hashCoord(state.pusher)
-	hash = 31*hash + hashCoords(state.boxes, state.boxCount)
-	//println(hash)
-	return hash
-}
-
-func Equal(a, b [5]Coord, boxCount int) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := 0; i < boxCount; i++ {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-	return true
 }
 
 func scoreState(grid Grid, state State) int {
@@ -239,22 +197,15 @@ func getGrid(grid Grid, coord Coord) Cell {
 }
 
 func boxStuck(grid Grid, box Coord) bool {
-	//return false
-	isTarget := getGrid(grid, box) == "*"
-
-	if isTarget {
+	if getGrid(grid, box) == "*" {
 		return false
 	}
 
-	touchVertical := isWall(grid, getNeighbor(Up, box)) || isWall(grid, getNeighbor(Down, box))
-
-	if !touchVertical {
+	if !isWall(grid, getNeighbor(Up, box)) && !isWall(grid, getNeighbor(Down, box)) {
 		return false
 	}
 
-	touchHorizontal := isWall(grid, getNeighbor(Left, box)) || isWall(grid, getNeighbor(Right, box))
-
-	if !touchHorizontal {
+	if !isWall(grid, getNeighbor(Left, box)) && !isWall(grid, getNeighbor(Right, box)) {
 		return false
 	}
 
@@ -272,9 +223,7 @@ func stateIsLost(grid Grid, state State) bool {
 
 func findBestAction(grid Grid, state State) Candidate {
 	for maxDepth := 10; maxDepth <= 400; maxDepth += 10 {
-		//println("maxDepth", maxDepth)
 		seenStates := make(map[State]struct{}, 300000)
-
 		internalHeap := make(CandidateHeap, 0, 10000)
 		candidates := &internalHeap
 		heap.Init(candidates)
@@ -309,7 +258,6 @@ func findBestAction(grid Grid, state State) Candidate {
 					newState := goTo(d, grid, c.state)
 
 					if newState.pusher != c.state.pusher {
-						//hChild := hashState(newState)
 						_, childSeen := seenStates[newState]
 
 						if !childSeen {
@@ -401,7 +349,6 @@ func mainCg() {
 		} else {
 			bestCandidate := findBestAction(grid, state)
 			log("best", bestCandidate)
-			// fmt.Fprintln(os.Stderr, "Debug messages...")
 			fmt.Println(showDir(bestCandidate.actions[0]))
 		}
 
@@ -483,7 +430,6 @@ func mainProfile() {
 	}
 
 	puzzles := []Puzzle{hardPuzzle, mediumPuzzle2, mediumPuzzle, easyPuzzle}
-	//puzzles := []Puzzle{easyPuzzle, mediumPuzzle, mediumPuzzle2}
 
 	for _, puzzle := range puzzles {
 		state := State{
