@@ -88,9 +88,9 @@ func contains(s [5]Coord, e Coord) bool {
 }
 
 func isWall(grid Grid, coord Coord) bool {
-	// if coord.y < 0 || coord.x < 0 {
-	// 	panic(fmt.Sprintf("negative coord %v", coord))
-	// }
+	if coord.y < 0 || coord.x < 0 {
+		panic(fmt.Sprintf("negative coord %v", coord))
+	}
 	return grid[coord.y][coord.x] == "#"
 }
 
