@@ -302,9 +302,9 @@ func findBestAction(grid Grid, state State) Candidate {
 		// c := candidates[len(candidates)-1]
 		c := heap.Pop(candidates).(*Candidate)
 
-		//if (len(seenStates) % 100000) == 0 {
-		//	log("len candidates", fmt.Sprintf("%d candidates: %v seen %d", len(*candidates), c, len(seenStates)))
-		//}
+		if (len(seenStates) % 1000000) == 0 {
+			log("len candidates", fmt.Sprintf("%d candidates: %v seen %d", len(*candidates), c, len(seenStates)))
+		}
 		// log("len candidates", fmt.Sprintf("%d seen %v", len(candidates), len(seenStates)))
 		// candidates[0] = Candidate{}
 		//candidates = candidates[:len(candidates)-1]
