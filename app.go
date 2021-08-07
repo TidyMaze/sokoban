@@ -302,7 +302,7 @@ func findBestAction(grid Grid, state State) Candidate {
 		// c := candidates[len(candidates)-1]
 		c := heap.Pop(candidates).(*Candidate)
 
-		if (len(seenStates) % 1000000) == 0 {
+		if (len(*candidates) % 100000) == 0 {
 			log("len candidates", fmt.Sprintf("%d candidates: %v seen %d", len(*candidates), c, len(seenStates)))
 		}
 		// log("len candidates", fmt.Sprintf("%d seen %v", len(candidates), len(seenStates)))
@@ -372,10 +372,10 @@ func findBestAction(grid Grid, state State) Candidate {
 			//	return candidates[i].score < candidates[j].score
 			//})
 
-			//const MAX_BUFFER = 400
-			//if len(candidates) > MAX_BUFFER {
-			//	candidates = candidates[len(candidates)-MAX_BUFFER:]
-			//}
+			const MAX_BUFFER = 100000
+			if len(internalHeap) > MAX_BUFFER {
+				internalHeap = internalHeap[:MAX_BUFFER]
+			}
 		}
 	}
 
