@@ -29,6 +29,12 @@ type Candidate struct {
 	state   State
 }
 
+type Puzzle struct {
+	rawGrid    string
+	boxes      [5]Coord
+	startCoord Coord
+}
+
 func log(msg string, v interface{}) {
 	fmt.Fprintf(os.Stderr, "%s: %+v\n", msg, v)
 }
@@ -443,7 +449,8 @@ func mainProfile() {
 
 	defer pprof.StopCPUProfile()
 
-	gridRaw := `..#######
+	easyPuzzle := Puzzle{
+		`..#######
 ..#.....#
 .##.###.#
 ##....#.#
@@ -451,16 +458,21 @@ func mainProfile() {
 #.....#.#
 #..##...#
 #..######
-####.....`
+####.....`,
+		[5]Coord{{x: 2, y: 4}, {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}, {x: 6, y: 4}},
+		Coord{7, 4},
+	}
+
+	puzzle := easyPuzzle
 
 	state := State{
-		pusher: Coord{7, 4},
-		boxes:  [5]Coord{{x: 2, y: 4}, {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}, {x: 6, y: 4}},
+		pusher: puzzle.startCoord,
+		boxes:  puzzle.boxes,
 	}
 
 	boxCount = 5
 
-	grid := parseGrid(gridRaw)
+	grid := parseGrid(puzzle.rawGrid)
 
 	for i := 0; i < 3; i++ {
 		best := findBestAction(grid, state)
