@@ -144,30 +144,37 @@ func goTo(direction Direction, grid Grid, state State) State {
 	destination := getNeighbor(direction, state.pusher)
 
 	if isWall(grid, destination) {
-		// cannot move if wall
 		return state
 	} else if isBox(state.boxes, state.boxCount, destination) {
-		// check if next is available if cell is box
 		afterBoxCoord := getNeighbor(direction, destination)
-		if isWall(grid, afterBoxCoord) || isBox(state.boxes, state.boxCount, afterBoxCoord) {
-			// cannot push box if next is wall or another box
+		if afterBoxIsOccupied(grid, afterBoxCoord, state) {
 			return state
 		} else {
-			// can push box, copy and replace boxes list
-			return State{
-				pusher:   destination,
-				boxes:    moveBox(state.boxes, state.boxCount, destination, afterBoxCoord),
-				boxCount: state.boxCount,
-			}
+			return moveByPushingBox(destination, state, afterBoxCoord)
 		}
 	} else {
-		// can move if empty cell
-		return State{
-			pusher:   destination,
-			boxes:    state.boxes,
-			boxCount: state.boxCount,
-		}
+		return moveToEmptyCell(destination, state)
 	}
+}
+
+func moveToEmptyCell(destination Coord, state State) State {
+	return State{
+		pusher:   destination,
+		boxes:    state.boxes,
+		boxCount: state.boxCount,
+	}
+}
+
+func moveByPushingBox(destination Coord, state State, afterBoxCoord Coord) State {
+	return State{
+		pusher:   destination,
+		boxes:    moveBox(state.boxes, state.boxCount, destination, afterBoxCoord),
+		boxCount: state.boxCount,
+	}
+}
+
+func afterBoxIsOccupied(grid Grid, afterBoxCoord Coord, state State) bool {
+	return isWall(grid, afterBoxCoord) || isBox(state.boxes, state.boxCount, afterBoxCoord)
 }
 
 func sortCoords(coords []Coord) {
