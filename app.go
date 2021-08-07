@@ -278,16 +278,17 @@ func findBestAction(grid Grid, state State) Candidate {
 
 func buildNewCandidate(grid Grid, newState State, c *Candidate, maxDepth int, d Direction) Candidate {
 	score := scoreState(grid, newState)
+
 	newActions := make([]Direction, len(c.actions), maxDepth)
+
 	copy(newActions, c.actions)
 	newActions = append(newActions, d)
-	newCandidate := Candidate{
+
+	return Candidate{
 		actions: newActions,
 		score:   score,
 		state:   newState,
 	}
-
-	return newCandidate
 }
 
 var solution = []Direction{}
