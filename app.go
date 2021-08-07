@@ -59,6 +59,8 @@ func (h *CandidateHeap) Pop() interface{} {
 	return x
 }
 
+const TARGET_CELL = "*"
+
 func log(msg string, v interface{}) {
 	fmt.Fprintf(os.Stderr, "%s: %+v\n", msg, v)
 }
@@ -197,19 +199,17 @@ func getGrid(grid Grid, coord Coord) Cell {
 }
 
 func boxStuck(grid Grid, box Coord) bool {
-	if getGrid(grid, box) == "*" {
-		return false
-	}
+	return getGrid(grid, box) != TARGET_CELL &&
+		touchingWallVertical(grid, box) &&
+		touchingWallHorizontal(grid, box)
+}
 
-	if !isWall(grid, getNeighbor(Up, box)) && !isWall(grid, getNeighbor(Down, box)) {
-		return false
-	}
+func touchingWallVertical(grid Grid, box Coord) bool {
+	return isWall(grid, getNeighbor(Up, box)) || isWall(grid, getNeighbor(Down, box))
+}
 
-	if !isWall(grid, getNeighbor(Left, box)) && !isWall(grid, getNeighbor(Right, box)) {
-		return false
-	}
-
-	return true
+func touchingWallHorizontal(grid Grid, box Coord) bool {
+	return isWall(grid, getNeighbor(Left, box)) || isWall(grid, getNeighbor(Right, box))
 }
 
 func stateIsLost(grid Grid, state State) bool {
