@@ -253,21 +253,29 @@ func findBestAction(grid Grid, state State) Candidate {
 				return *c
 			}
 
-			if len(c.actions) < maxDepth {
+			if !reachedMaxDepth(c, maxDepth) {
 				for _, d := range directions {
-					newState := goTo(d, grid, candidateState)
-					if discoveredNewValidState(newState, candidateState, seenStates) {
-						markStateAsSeen(seenStates, newState)
-						if !stateIsLost(grid, newState) {
-							addNewCandidateToQueue(grid, newState, c, maxDepth, d, candidates)
-						}
-					}
+					exploreInDirection(grid, d, candidateState, seenStates, c, maxDepth, candidates)
 				}
 			}
 		}
 	}
 
 	panic("no solution found")
+}
+
+func reachedMaxDepth(c *Candidate, maxDepth int) bool {
+	return len(c.actions) >= maxDepth
+}
+
+func exploreInDirection(grid Grid, d Direction, candidateState State, seenStates map[State]struct{}, c *Candidate, maxDepth int, candidates *CandidateHeap) {
+	newState := goTo(d, grid, candidateState)
+	if discoveredNewValidState(newState, candidateState, seenStates) {
+		markStateAsSeen(seenStates, newState)
+		if !stateIsLost(grid, newState) {
+			addNewCandidateToQueue(grid, newState, c, maxDepth, d, candidates)
+		}
+	}
 }
 
 func discoveredNewValidState(newState State, candidateState State, seenStates map[State]struct{}) bool {
