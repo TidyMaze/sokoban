@@ -273,11 +273,11 @@ func stateIsLost(grid Grid, state State) bool {
 }
 
 func findBestAction(grid Grid, state State) Candidate {
-	seenStates := make(map[State]struct{}, 20000000)
+	seenStates := make(map[State]struct{})
 
 	const MAX_DEPTH = 400
 
-	internalHeap := make(CandidateHeap, 0, 500000)
+	internalHeap := make(CandidateHeap, 0)
 	candidates := &internalHeap
 	heap.Init(candidates)
 
@@ -336,12 +336,12 @@ func findBestAction(grid Grid, state State) Candidate {
 				}
 			}
 
-			//const MAX_BUFFER = 10000
-			//if len(*candidates) > MAX_BUFFER {
-			//	for len(*candidates) > (MAX_BUFFER / 2) {
-			//		heap.Remove(candidates, len(*candidates)-1)
-			//	}
-			//}
+			const MAX_BUFFER = 100000
+			if len(*candidates) > MAX_BUFFER {
+				for len(*candidates) > (MAX_BUFFER / 2) {
+					heap.Remove(candidates, len(*candidates)-1)
+				}
+			}
 		}
 	}
 
