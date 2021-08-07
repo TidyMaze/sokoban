@@ -358,9 +358,9 @@ func findBestAction(grid Grid, state State) Candidate {
 var solution = []Direction{}
 
 func main() {
-	mainCg()
+	//mainCg()
 
-	// mainProfile()
+	mainProfile()
 }
 
 func mainCg() {
