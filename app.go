@@ -344,15 +344,20 @@ func markStateAsSeen(seenStates map[State]struct{}, newState State) {
 func buildNewCandidate(grid Grid, newState State, c *Candidate, maxDepth int, d Direction) Candidate {
 	score := scoreState(grid, newState)
 
-	newActions := make([]Direction, len(c.actions), maxDepth)
-	copy(newActions, c.actions)
-	newActions = append(newActions, d)
+	newActions := appendWithCopy(&c.actions, maxDepth, d)
 
 	return Candidate{
 		actions: newActions,
 		score:   score,
 		state:   newState,
 	}
+}
+
+func appendWithCopy(actions *[]Direction, newCap int, element Direction) []Direction {
+	newActions := make([]Direction, len(*actions), newCap)
+	copy(newActions, *actions)
+	newActions = append(newActions, element)
+	return newActions
 }
 
 var solution = []Direction{}
