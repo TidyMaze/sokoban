@@ -285,7 +285,7 @@ func findBestAction(grid Grid, state State) Candidate {
 	const MAX_NEW_CANDIDATES = 10
 	const MAX_DEPTH = 400
 
-	internalHeap := make(CandidateHeap, 0, 1000)
+	internalHeap := make(CandidateHeap, 0, 500000)
 	candidates := &internalHeap
 	heap.Init(candidates)
 
@@ -361,10 +361,6 @@ func findBestAction(grid Grid, state State) Candidate {
 								score:   score,
 								state:   newState,
 							}
-
-							// if len(candidates) == cap(candidates) {
-							// 	log("too small", MAX_NEW_CANDIDATES)
-							// }
 
 							heap.Push(candidates, &newCandidate)
 						}
