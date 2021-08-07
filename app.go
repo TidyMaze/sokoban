@@ -32,6 +32,7 @@ type Candidate struct {
 type Puzzle struct {
 	rawGrid    string
 	boxes      [5]Coord
+	boxCount   int
 	startCoord Coord
 }
 
@@ -460,6 +461,7 @@ func mainProfile() {
 #..######
 ####.....`,
 		[5]Coord{{x: 2, y: 4}, {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}, {x: 6, y: 4}},
+		5,
 		Coord{7, 4},
 	}
 
@@ -472,7 +474,8 @@ func mainProfile() {
 #..*#.##
 #*....#.
 #######.`,
-		[5]Coord{{x: 3, y: 3}, {x: 2, y: 4}, {x: 3, y: 4}, {x: 5, y: 4}, {x: 0, y: 0}},
+		[5]Coord{{x: 3, y: 3}, {x: 2, y: 4}, {x: 3, y: 4}, {x: 5, y: 4}},
+		4,
 		Coord{4, 6},
 	}
 
