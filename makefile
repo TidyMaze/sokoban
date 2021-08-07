@@ -5,7 +5,7 @@ build:
 build-profile:
 	go build -o out/sokoban-profile
 
-run-profile:
+run-profile: build-profile
 	./out/sokoban-profile profile
 
 display-cpu-profile:
@@ -14,4 +14,7 @@ display-cpu-profile:
 display-heap-profile:
 	pprof -http=:8080 out/mem.prof
 
-profile-all: build-profile run-profile display-cpu-profile
+live-heap-profile:
+	pprof -http=:8080 http://localhost:6060/debug/pprof/heap
+
+profile-all: run-profile live-heap-profile

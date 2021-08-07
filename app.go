@@ -4,11 +4,11 @@ import (
 	"bufio"
 	"container/heap"
 	"fmt"
+	"net/http"
 	"os"
-	"runtime"
-	"runtime/pprof"
 	"strings"
 )
+import _ "net/http/pprof"
 
 type Cell = string
 type Grid = [][]Cell
@@ -473,21 +473,25 @@ func parseGrid(raw string) Grid {
 }
 
 func mainProfile() {
-	log("starting CPU profile", true)
+	go func() {
+		println(http.ListenAndServe("localhost:6060", nil))
+	}()
 
-	f, err := os.Create("out/out.prof")
-	if err != nil {
-		log("could not create CPU profile: ", err)
-	}
-	defer f.Close()
-
-	runtime.SetCPUProfileRate(500)
-
-	if err := pprof.StartCPUProfile(f); err != nil {
-		log("could not start CPU profile: ", err)
-	}
-
-	defer pprof.StopCPUProfile()
+	//log("starting CPU profile", true)
+	//
+	//f, err := os.Create("out/out.prof")
+	//if err != nil {
+	//	log("could not create CPU profile: ", err)
+	//}
+	//defer f.Close()
+	//
+	//runtime.SetCPUProfileRate(500)
+	//
+	//if err := pprof.StartCPUProfile(f); err != nil {
+	//	log("could not start CPU profile: ", err)
+	//}
+	//
+	//defer pprof.StopCPUProfile()
 
 	easyPuzzle := Puzzle{
 		`..#######
