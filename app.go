@@ -427,7 +427,7 @@ func parseGrid(raw string) Grid {
 func mainProfile() {
 	log("starting CPU profile", true)
 
-	f, err := os.Create("out.prof")
+	f, err := os.Create("out/out.prof")
 	if err != nil {
 		log("could not create CPU profile: ", err)
 	}
