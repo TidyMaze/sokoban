@@ -280,7 +280,7 @@ func min(a, b int) int {
 }
 
 func findBestAction(grid Grid, state State) Candidate {
-	seenStates := make(map[int]bool, 5000000)
+	seenStates := make(map[int]bool, 12000000)
 
 	const MAX_NEW_CANDIDATES = 10
 	const MAX_DEPTH = 400
@@ -368,7 +368,6 @@ func findBestAction(grid Grid, state State) Candidate {
 
 							heap.Push(candidates, &newCandidate)
 						}
-
 					}
 				}
 			}
