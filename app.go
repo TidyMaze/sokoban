@@ -135,14 +135,7 @@ func moveBox(boxes [5]Coord, boxCount int, from Coord, to Coord) [5]Coord {
 }
 
 func goTo(direction Direction, grid Grid, state State) State {
-	// if state.pusher.x == 0 && state.pusher.y == 0 {
-	// 	panic(fmt.Sprintf("null pusher coord %v %v", direction, state.pusher))
-	// }
 	destination := getNeighbor(direction, state.pusher)
-
-	// if destination.y < 0 || destination.x < 0 {
-	// 	panic(fmt.Sprintf("negative coord %v %v %v", destination, direction, state.pusher))
-	// }
 
 	if isWall(grid, destination) {
 		// cannot move if wall
@@ -218,15 +211,6 @@ func sameState(state1 State, state2 State) bool {
 	return state1.pusher == state2.pusher && Equal(state1.boxes, state2.boxes, state1.boxCount)
 }
 
-// func copyState(state State) State {
-// 	copiedBoxes := make([]Coord, len(state.boxes))
-// 	copy(copiedBoxes, state.boxes)
-// 	return State{
-// 		pusher: state.pusher,
-// 		boxes:  copiedBoxes,
-// 	}
-// }
-
 func scoreState(grid Grid, state State) int {
 	count := 0
 	for i := 0; i < state.boxCount; i++ {
@@ -297,31 +281,10 @@ func findBestAction(grid Grid, state State) Candidate {
 	seenStates[hashState(initState.state)] = struct{}{}
 
 	for len(*candidates) > 0 {
-		// log("candidates", candidates)
-		// c := candidates[len(candidates)-1]
 		c := heap.Pop(candidates).(*Candidate)
-
-		//if (len(*candidates) % 100000) == 0 {
-		//	log("len candidates", fmt.Sprintf("%d candidates: %v seen %d", len(*candidates), c, len(seenStates)))
-		//}
-		// log("len candidates", fmt.Sprintf("%d seen %v", len(candidates), len(seenStates)))
-		// candidates[0] = Candidate{}
-		//candidates = candidates[:len(candidates)-1]
-		// candidates.Remove(ci)
 
 		// win!
 		if c.score == c.state.boxCount {
-
-			//f, err := os.Create("out/mem.prof")
-			//if err != nil {
-			//	println("could not create memory profile: ", err)
-			//}
-			//defer f.Close() // error handling omitted for example
-			//runtime.GC()    // get up-to-date statistics
-			//if err := pprof.WriteHeapProfile(f); err != nil {
-			//	println("could not write memory profile: ", err)
-			//}
-
 			log("won", c)
 			solution = c.actions[1:]
 			log("seenStates length", len(seenStates))
@@ -331,33 +294,11 @@ func findBestAction(grid Grid, state State) Candidate {
 		if len(c.actions) < MAX_DEPTH {
 
 			for _, d := range directions {
-				// if c.state.pusher.x == 0 && c.state.pusher.y == 0 {
-				// 	panic(fmt.Sprintf("null oldstate coord %v %v %v", d, c.state.pusher, c))
-				// }
-
 				newState := goTo(d, grid, c.state)
-
-				// if newState.pusher.x == 0 && newState.pusher.y == 0 {
-				// 	panic(fmt.Sprintf("null newState coord %v %v", d, newState.pusher))
-				// }
 
 				if newState.pusher != c.state.pusher {
 					hChild := hashState(newState)
-					// log("hChild", hChild)
-
 					_, childSeen := seenStates[hChild]
-
-					// hStored := hashState(storedState)
-
-					// if childSeen && !sameState(storedState, newState) {
-					// 	log("hash previous", hStored)
-					// 	log("state previous", storedState)
-					// 	log("hash new", hChild)
-					// 	log("state new", newState)
-					// 	log("hash1", hashState(storedState))
-					// 	log("hash2", hashState(newState))
-					// 	panic(fmt.Sprintf("%v and %v had the same hash %d", storedState, newState, hChild))
-					// }
 
 					if !childSeen {
 						seenStates[hChild] = struct{}{}
@@ -378,10 +319,6 @@ func findBestAction(grid Grid, state State) Candidate {
 				}
 			}
 
-			//sort.Slice(candidates, func(i, j int) bool {
-			//	return candidates[i].score < candidates[j].score
-			//})
-
 			//const MAX_BUFFER = 10000
 			//if len(*candidates) > MAX_BUFFER {
 			//	for len(*candidates) > (MAX_BUFFER / 2) {
@@ -395,10 +332,6 @@ func findBestAction(grid Grid, state State) Candidate {
 
 	panic("no solution found")
 }
-
-// func randInt(min int, max int) int {
-// 	return rand.Intn(max-min) + min
-// }
 
 var solution = []Direction{}
 
@@ -476,22 +409,6 @@ func mainProfile() {
 	go func() {
 		println(http.ListenAndServe("localhost:6060", nil))
 	}()
-
-	//log("starting CPU profile", true)
-	//
-	//f, err := os.Create("out/out.prof")
-	//if err != nil {
-	//	log("could not create CPU profile: ", err)
-	//}
-	//defer f.Close()
-	//
-	//runtime.SetCPUProfileRate(500)
-	//
-	//if err := pprof.StartCPUProfile(f); err != nil {
-	//	log("could not start CPU profile: ", err)
-	//}
-	//
-	//defer pprof.StopCPUProfile()
 
 	easyPuzzle := Puzzle{
 		`..#######
