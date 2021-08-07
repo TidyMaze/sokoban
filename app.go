@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"container/heap"
 	"fmt"
 	"os"
 	"runtime"
@@ -38,7 +39,7 @@ type Puzzle struct {
 type CandidateHeap []Candidate
 
 func (h CandidateHeap) Len() int           { return len(h) }
-func (h CandidateHeap) Less(i, j int) bool { return h[i].score < h[j].score }
+func (h CandidateHeap) Less(i, j int) bool { return h[i].score > h[j].score }
 func (h CandidateHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
 
 func (h *CandidateHeap) Push(x interface{}) {
@@ -278,26 +279,29 @@ func findBestAction(grid Grid, state State) Candidate {
 	const MAX_NEW_CANDIDATES = 10
 	const MAX_DEPTH = 400
 
-	candidates := make([]Candidate, 0, 1000)
+	internalHeap := make(CandidateHeap, 0, 1000)
+	candidates := &internalHeap
+	heap.Init(candidates)
+
 	initState := Candidate{
 		actions: []Direction{},
 		score:   scoreState(grid, state),
 		state:   state,
 	}
-	candidates = append(candidates, initState)
+	heap.Push(candidates, initState)
 	seenStates[hashState(initState.state)] = true
 
-	for len(candidates) > 0 {
+	for len(*candidates) > 0 {
 		// log("candidates", candidates)
 		// c := candidates[len(candidates)-1]
-		c := candidates[len(candidates)-1]
+		c := heap.Pop(candidates).(Candidate)
 
 		if (len(seenStates) % 100000) == 0 {
-			log("len candidates", fmt.Sprintf("%d candidates: %v seen %d", len(candidates), c, len(seenStates)))
+			log("len candidates", fmt.Sprintf("%d candidates: %v seen %d", len(*candidates), c, len(seenStates)))
 		}
 		// log("len candidates", fmt.Sprintf("%d seen %v", len(candidates), len(seenStates)))
 		// candidates[0] = Candidate{}
-		candidates = candidates[:len(candidates)-1]
+		//candidates = candidates[:len(candidates)-1]
 		// candidates.Remove(ci)
 
 		// win!
@@ -356,7 +360,7 @@ func findBestAction(grid Grid, state State) Candidate {
 							// 	log("too small", MAX_NEW_CANDIDATES)
 							// }
 
-							candidates = append(candidates, newCandidate)
+							heap.Push(candidates, newCandidate)
 						}
 
 					}
@@ -515,7 +519,7 @@ func mainProfile() {
 	}
 
 	//puzzles := []Puzzle{mediumPuzzle2, mediumPuzzle, easyPuzzle}
-	puzzles := []Puzzle{easyPuzzle, mediumPuzzle, mediumPuzzle2}[:2]
+	puzzles := []Puzzle{easyPuzzle, mediumPuzzle, mediumPuzzle2}
 
 	for _, puzzle := range puzzles {
 		state := State{
