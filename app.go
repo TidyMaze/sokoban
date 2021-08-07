@@ -341,9 +341,9 @@ func markStateAsSeen(seenStates map[State]struct{}, newState State) {
 	seenStates[newState] = struct{}{}
 }
 
-func buildNewCandidate(grid Grid, newState State, candidate *Candidate, maxDepth int, d Direction) Candidate {
+func buildNewCandidate(grid Grid, newState State, candidate *Candidate, maxDepth int, direction Direction) Candidate {
 	return Candidate{
-		actions: appendAction(&candidate.actions, maxDepth, d),
+		actions: appendAction(&candidate.actions, maxDepth, direction),
 		score:   scoreState(grid, newState),
 		state:   newState,
 	}
