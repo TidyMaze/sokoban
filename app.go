@@ -131,8 +131,7 @@ func moveBox(boxes [5]Coord, boxCount int, from Coord, to Coord) [5]Coord {
 			newBoxes[i] = to
 			sl := newBoxes[:]
 
-			// necessary for state hashing, boxes order is NOT important, so we can sort them
-			sortCoords(sl[:boxCount])
+			sortBoxesForStableHash(sl[:boxCount])
 
 			return newBoxes
 		}
@@ -177,7 +176,7 @@ func afterBoxIsOccupied(grid Grid, afterBoxCoord Coord, state State) bool {
 	return isWall(grid, afterBoxCoord) || isBox(state.boxes, state.boxCount, afterBoxCoord)
 }
 
-func sortCoords(coords []Coord) {
+func sortBoxesForStableHash(coords []Coord) {
 	sort.SliceStable(coords, func(i, j int) bool {
 		y1 := coords[i].y
 		y2 := coords[j].y
@@ -289,7 +288,7 @@ func buildInitialCandidate(grid Grid, state State, candidates *CandidateHeap) Ca
 	}
 
 	boxes := candidate.state.boxes[:candidate.state.boxCount]
-	sortCoords(boxes)
+	sortBoxesForStableHash(boxes)
 
 	heap.Push(candidates, &candidate)
 	return candidate
