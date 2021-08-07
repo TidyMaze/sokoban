@@ -303,30 +303,29 @@ func findBestAction(grid Grid, state State) Candidate {
 					if !childSeen {
 						seenStates[hChild] = struct{}{}
 						if !stateIsLost(grid, newState) {
-							newHistory := make([]Direction, len(c.actions), MAX_DEPTH)
-							copy(newHistory, c.actions)
-							newHistory = append(newHistory, d)
 							score := scoreState(grid, newState)
-							newCandidate := Candidate{
-								actions: newHistory,
+							newCandidate := &Candidate{
+								actions: make([]Direction, len(c.actions), MAX_DEPTH),
 								score:   score,
 								state:   newState,
 							}
 
-							heap.Push(candidates, &newCandidate)
+							copy(newCandidate.actions, c.actions)
+							newCandidate.actions = append(newCandidate.actions, d)
+
+							heap.Push(candidates, newCandidate)
+
 						}
 					}
 				}
 			}
 
-			//const MAX_BUFFER = 10000
-			//if len(*candidates) > MAX_BUFFER {
-			//	for len(*candidates) > (MAX_BUFFER / 2) {
-			//		heap.Remove(candidates, len(*candidates)-1)
-			//	}
-			//	println("cut")
-			//}
-
+			const MAX_BUFFER = 10000
+			if len(*candidates) > MAX_BUFFER {
+				for len(*candidates) > (MAX_BUFFER / 2) {
+					heap.Remove(candidates, len(*candidates)-1)
+				}
+			}
 		}
 	}
 
