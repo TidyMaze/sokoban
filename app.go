@@ -371,10 +371,14 @@ func findBestAction(grid Grid, state State) Candidate {
 			//	return candidates[i].score < candidates[j].score
 			//})
 
-			const MAX_BUFFER = 50000
-			for len(*candidates) > MAX_BUFFER {
-				heap.Remove(candidates, len(*candidates)-1)
+			const MAX_BUFFER = 10000
+			if len(*candidates) > MAX_BUFFER {
+				for len(*candidates) > (MAX_BUFFER / 2) {
+					heap.Remove(candidates, len(*candidates)-1)
+				}
+				println("cut")
 			}
+
 		}
 	}
 
