@@ -228,15 +228,7 @@ func findBestAction(grid Grid, state State) Candidate {
 		candidates := &internalHeap
 		heap.Init(candidates)
 
-		initState := Candidate{
-			actions: []Direction{},
-			score:   scoreState(grid, state),
-			state:   state,
-		}
-		heap.Push(candidates, &initState)
-
-		s := initState.state.boxes[:initState.state.boxCount]
-		sortCoords(s)
+		initState := buildInitialCandidate(grid, state, candidates)
 
 		markStateAsSeen(seenStates, initState.state)
 
@@ -256,6 +248,20 @@ func findBestAction(grid Grid, state State) Candidate {
 	}
 
 	panic("no solution found")
+}
+
+func buildInitialCandidate(grid Grid, state State, candidates *CandidateHeap) Candidate {
+	candidate := Candidate{
+		actions: []Direction{},
+		score:   scoreState(grid, state),
+		state:   state,
+	}
+
+	boxes := candidate.state.boxes[:candidate.state.boxCount]
+	sortCoords(boxes)
+
+	heap.Push(candidates, &candidate)
+	return candidate
 }
 
 func thereAreStillCandidates(candidates *CandidateHeap) bool {
