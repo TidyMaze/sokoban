@@ -222,30 +222,46 @@ func stateIsLost(grid Grid, state State) bool {
 }
 
 func findBestAction(grid Grid, state State) Candidate {
-	for maxDepth := 100; maxDepth <= 400; maxDepth += 100 {
-		seenStates := buildSeenMap()
-		candidateHeap := buildCandidatesQueue()
-
-		initState := buildInitialCandidate(grid, state, &candidateHeap)
-
-		markStateAsSeen(seenStates, initState.state)
-
-		for thereAreStillCandidates(&candidateHeap) {
-			candidate := getBestCandidate(&candidateHeap)
-			if won(candidate, candidate.state) {
-				storeWin(candidate, seenStates, candidateHeap)
-				return *candidate
-			}
-
-			if !reachedMaxDepth(candidate, maxDepth) {
-				for _, d := range directions {
-					exploreInDirection(grid, d, candidate.state, seenStates, candidate, maxDepth, &candidateHeap)
-				}
-			}
-		}
+	candidate, done := findBestActionIterativeDeepening(grid, state)
+	if done {
+		return candidate
 	}
 
 	panic("no solution found")
+}
+
+func findBestActionIterativeDeepening(grid Grid, state State) (Candidate, bool) {
+	for maxDepth := 100; maxDepth <= 400; maxDepth += 100 {
+		candidate, done := findBestActionWithMaxDepth(grid, state, maxDepth)
+		if done {
+			return candidate, true
+		}
+	}
+	return Candidate{}, false
+}
+
+func findBestActionWithMaxDepth(grid Grid, state State, maxDepth int) (Candidate, bool) {
+	seenStates := buildSeenMap()
+	candidateHeap := buildCandidatesQueue()
+
+	initState := buildInitialCandidate(grid, state, &candidateHeap)
+
+	markStateAsSeen(seenStates, initState.state)
+
+	for thereAreStillCandidates(&candidateHeap) {
+		candidate := getBestCandidate(&candidateHeap)
+		if won(candidate, candidate.state) {
+			storeWin(candidate, seenStates, candidateHeap)
+			return *candidate, true
+		}
+
+		if !reachedMaxDepth(candidate, maxDepth) {
+			for _, d := range directions {
+				exploreInDirection(grid, d, candidate.state, seenStates, candidate, maxDepth, &candidateHeap)
+			}
+		}
+	}
+	return Candidate{}, false
 }
 
 func buildCandidatesQueue() CandidateHeap {
