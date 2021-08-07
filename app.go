@@ -36,7 +36,7 @@ type Puzzle struct {
 	startCoord Coord
 }
 
-type CandidateHeap []Candidate
+type CandidateHeap []*Candidate
 
 func (h CandidateHeap) Len() int { return len(h) }
 
@@ -48,13 +48,14 @@ func (h CandidateHeap) Less(i, j int) bool { return h[i].score > h[j].score }
 func (h CandidateHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
 
 func (h *CandidateHeap) Push(x interface{}) {
-	*h = append(*h, x.(Candidate))
+	*h = append(*h, x.(*Candidate))
 }
 
 func (h *CandidateHeap) Pop() interface{} {
 	old := *h
 	n := len(old)
 	x := old[n-1]
+	old[n-1] = nil
 	*h = old[0 : n-1]
 	return x
 }
@@ -293,13 +294,13 @@ func findBestAction(grid Grid, state State) Candidate {
 		score:   scoreState(grid, state),
 		state:   state,
 	}
-	heap.Push(candidates, initState)
+	heap.Push(candidates, &initState)
 	seenStates[hashState(initState.state)] = true
 
 	for len(*candidates) > 0 {
 		// log("candidates", candidates)
 		// c := candidates[len(candidates)-1]
-		c := heap.Pop(candidates).(Candidate)
+		c := heap.Pop(candidates).(*Candidate)
 
 		if (len(seenStates) % 100000) == 0 {
 			log("len candidates", fmt.Sprintf("%d candidates: %v seen %d", len(*candidates), c, len(seenStates)))
@@ -314,7 +315,7 @@ func findBestAction(grid Grid, state State) Candidate {
 			log("won", c)
 			solution = c.actions[1:]
 			log("seenStates length", len(seenStates))
-			return c
+			return *c
 		}
 
 		if len(c.actions) < MAX_DEPTH {
@@ -365,7 +366,7 @@ func findBestAction(grid Grid, state State) Candidate {
 							// 	log("too small", MAX_NEW_CANDIDATES)
 							// }
 
-							heap.Push(candidates, newCandidate)
+							heap.Push(candidates, &newCandidate)
 						}
 
 					}
