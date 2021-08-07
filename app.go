@@ -311,6 +311,17 @@ func findBestAction(grid Grid, state State) Candidate {
 
 		// win!
 		if c.score == c.state.boxCount {
+
+			//f, err := os.Create("out/mem.prof")
+			//if err != nil {
+			//	println("could not create memory profile: ", err)
+			//}
+			//defer f.Close() // error handling omitted for example
+			//runtime.GC()    // get up-to-date statistics
+			//if err := pprof.WriteHeapProfile(f); err != nil {
+			//	println("could not write memory profile: ", err)
+			//}
+
 			log("won", c)
 			solution = c.actions[1:]
 			log("seenStates length", len(seenStates))
@@ -371,13 +382,13 @@ func findBestAction(grid Grid, state State) Candidate {
 			//	return candidates[i].score < candidates[j].score
 			//})
 
-			const MAX_BUFFER = 10000
-			if len(*candidates) > MAX_BUFFER {
-				for len(*candidates) > (MAX_BUFFER / 2) {
-					heap.Remove(candidates, len(*candidates)-1)
-				}
-				println("cut")
-			}
+			//const MAX_BUFFER = 10000
+			//if len(*candidates) > MAX_BUFFER {
+			//	for len(*candidates) > (MAX_BUFFER / 2) {
+			//		heap.Remove(candidates, len(*candidates)-1)
+			//	}
+			//	println("cut")
+			//}
 
 		}
 	}
