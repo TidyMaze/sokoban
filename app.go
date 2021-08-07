@@ -463,21 +463,36 @@ func mainProfile() {
 		Coord{7, 4},
 	}
 
-	puzzle := easyPuzzle
-
-	state := State{
-		pusher: puzzle.startCoord,
-		boxes:  puzzle.boxes,
+	mediumPuzzle := Puzzle{
+		`####....
+#..#....
+#..#####
+#......#
+##.*.*.#
+#..*#.##
+#*....#.
+#######.`,
+		[5]Coord{{x: 3, y: 3}, {x: 2, y: 4}, {x: 3, y: 4}, {x: 5, y: 4}, {x: 0, y: 0}},
+		Coord{4, 6},
 	}
 
-	boxCount = 5
+	puzzles := []Puzzle{easyPuzzle, mediumPuzzle}
 
-	grid := parseGrid(puzzle.rawGrid)
+	for _, puzzle := range puzzles {
+		state := State{
+			pusher: puzzle.startCoord,
+			boxes:  puzzle.boxes,
+		}
 
-	for i := 0; i < 3; i++ {
-		best := findBestAction(grid, state)
-		log("best profile", best)
-		log("actions len", len(best.actions))
+		boxCount = 5
+
+		grid := parseGrid(puzzle.rawGrid)
+
+		for i := 0; i < 3; i++ {
+			best := findBestAction(grid, state)
+			log("best profile", best)
+			log("actions len", len(best.actions))
+		}
 	}
 
 }
