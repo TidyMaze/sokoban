@@ -271,71 +271,72 @@ func stateIsLost(grid Grid, state State) bool {
 }
 
 func findBestAction(grid Grid, state State) Candidate {
-	seenStates := make(map[State]struct{}, 300000)
+	for maxDepth := 10; maxDepth <= 400; maxDepth += 10 {
+		//println("maxDepth", maxDepth)
+		seenStates := make(map[State]struct{}, 300000)
 
-	const MAX_DEPTH = 400
+		internalHeap := make(CandidateHeap, 0, 10000)
+		candidates := &internalHeap
+		heap.Init(candidates)
 
-	internalHeap := make(CandidateHeap, 0, 10000)
-	candidates := &internalHeap
-	heap.Init(candidates)
-
-	initState := Candidate{
-		actions: []Direction{},
-		score:   scoreState(grid, state),
-		state:   state,
-	}
-	heap.Push(candidates, &initState)
-
-	s := initState.state.boxes[:initState.state.boxCount]
-	sortCoords(s)
-
-	seenStates[initState.state] = struct{}{}
-
-	for len(*candidates) > 0 {
-		c := heap.Pop(candidates).(*Candidate)
-
-		// win!
-		if c.score == c.state.boxCount {
-			log("won", c)
-			solution = c.actions[1:]
-			log("seenStates len", len(seenStates))
-			log("heap cap", cap(internalHeap))
-			return *c
+		initState := Candidate{
+			actions: []Direction{},
+			score:   scoreState(grid, state),
+			state:   state,
 		}
+		heap.Push(candidates, &initState)
 
-		if len(c.actions) < MAX_DEPTH {
+		s := initState.state.boxes[:initState.state.boxCount]
+		sortCoords(s)
 
-			for _, d := range directions {
-				newState := goTo(d, grid, c.state)
+		seenStates[initState.state] = struct{}{}
 
-				if newState.pusher != c.state.pusher {
-					//hChild := hashState(newState)
-					_, childSeen := seenStates[newState]
+		for len(*candidates) > 0 {
+			c := heap.Pop(candidates).(*Candidate)
 
-					if !childSeen {
-						seenStates[newState] = struct{}{}
-						if !stateIsLost(grid, newState) {
-							score := scoreState(grid, newState)
-							newCandidate := &Candidate{
-								actions: make([]Direction, len(c.actions), MAX_DEPTH),
-								score:   score,
-								state:   newState,
+			// win!
+			if c.score == c.state.boxCount {
+				log("won", c)
+				solution = c.actions[1:]
+				log("seenStates len", len(seenStates))
+				log("heap cap", cap(internalHeap))
+				return *c
+			}
+
+			if len(c.actions) < maxDepth {
+
+				for _, d := range directions {
+					newState := goTo(d, grid, c.state)
+
+					if newState.pusher != c.state.pusher {
+						//hChild := hashState(newState)
+						_, childSeen := seenStates[newState]
+
+						if !childSeen {
+							seenStates[newState] = struct{}{}
+							if !stateIsLost(grid, newState) {
+								score := scoreState(grid, newState)
+								newCandidate := &Candidate{
+									actions: make([]Direction, len(c.actions), maxDepth),
+									score:   score,
+									state:   newState,
+								}
+
+								copy(newCandidate.actions, c.actions)
+								newCandidate.actions = append(newCandidate.actions, d)
+
+								heap.Push(candidates, newCandidate)
+
 							}
-
-							copy(newCandidate.actions, c.actions)
-							newCandidate.actions = append(newCandidate.actions, d)
-
-							heap.Push(candidates, newCandidate)
-
 						}
 					}
 				}
-			}
 
-			const MAX_BUFFER = 100000
-			if len(*candidates) > MAX_BUFFER {
-				for len(*candidates) > (MAX_BUFFER / 2) {
-					heap.Remove(candidates, len(*candidates)-1)
+				const MAX_BUFFER = 100000
+				if len(*candidates) > MAX_BUFFER {
+					for len(*candidates) > (MAX_BUFFER / 2) {
+						heap.Remove(candidates, len(*candidates)-1)
+					}
 				}
 			}
 		}
