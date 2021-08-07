@@ -6,7 +6,7 @@ build-profile: app.go
 	go build -o out/sokoban-profile
 
 run-profile: out/sokoban-profile
-	./out/sokoban-profile
+	./out/sokoban-profile profile
 
 display-profile: out/out.prof
 	pprof -http=:8080 out/out.prof

@@ -358,9 +358,11 @@ func findBestAction(grid Grid, state State) Candidate {
 var solution = []Direction{}
 
 func main() {
-	//mainCg()
-
-	mainProfile()
+	if len(os.Args) > 1 && strings.Compare(os.Args[1], "profile") == 0 {
+		mainProfile()
+	} else {
+		mainCg()
+	}
 }
 
 func mainCg() {
