@@ -38,7 +38,12 @@ type Puzzle struct {
 
 type CandidateHeap []Candidate
 
-func (h CandidateHeap) Len() int           { return len(h) }
+func (h CandidateHeap) Len() int { return len(h) }
+
+/**
+WTF we pop the last element so the last should be the highest, not the lowest!
+Yet this impl works a lot better
+*/
 func (h CandidateHeap) Less(i, j int) bool { return h[i].score > h[j].score }
 func (h CandidateHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
 
